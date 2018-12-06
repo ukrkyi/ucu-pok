@@ -6,11 +6,21 @@
 static volatile bool reversed = true;
 static volatile bool pwm_down = false;
 
+uint32_t lastPress = 0;
+
 void EXTI0_IRQHandler(void)
 {
 	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_0);
+	if (HAL_GetTick() - lastPress < 50)
+		return;
+	lastPress = HAL_GetTick();
 	reversed = !reversed;
 	pwm_down = !pwm_down;
+}
+
+void SysTick_Handler()
+{
+	HAL_IncTick();
 }
 
 static TIM_HandleTypeDef htim;
@@ -53,6 +63,7 @@ void setup(void)
 		HAL_TIM_PWM_ConfigChannel(&htim, &pwmConf, pins[i]);
 		HAL_TIM_PWM_Start(&htim, pins[i]);
 	}
+	HAL_InitTick(0);
 	conf.Pin = GPIO_PIN_0;
 	conf.Mode = GPIO_MODE_IT_RISING;
 	conf.Pull = GPIO_PULLDOWN,
