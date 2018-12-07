@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define DEBOUNCE_TIME 100
+
 static volatile bool reversed = true;
 static volatile bool pwm_down = false;
 
@@ -11,16 +13,19 @@ uint32_t lastPress = 0;
 void EXTI0_IRQHandler(void)
 {
 	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_0);
-	if (HAL_GetTick() - lastPress < 50)
+	if (HAL_GetTick() - lastPress < DEBOUNCE_TIME)
 		return;
 	lastPress = HAL_GetTick();
-	reversed = !reversed;
-	pwm_down = !pwm_down;
 }
 
 void SysTick_Handler()
 {
 	HAL_IncTick();
+	if (HAL_GetTick() - lastPress == DEBOUNCE_TIME &&
+	    HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET) {
+		reversed = !reversed;
+		pwm_down = !pwm_down;
+	}
 }
 
 static TIM_HandleTypeDef htim;
@@ -34,6 +39,7 @@ static const uint16_t pins[] = {
 void setup(void)
 {
 	__HAL_RCC_GPIOD_CLK_ENABLE();
+	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_TIM4_CLK_ENABLE();
 	GPIO_InitTypeDef conf = {
 		.Pin = GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15,
