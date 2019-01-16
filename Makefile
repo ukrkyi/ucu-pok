@@ -6,8 +6,10 @@ OUT_FILE = app
 
 ifneq ($(lastword $(subst /, ,$(CURDIR))),obj)
 
+%: all
+	@:
+
 all:
-%:
 	mkdir -p $(OBJDIR)
 	$(MAKE) -C $(OBJDIR) -f ../Makefile -$(MAKEFLAGS) "ROOTDIR=$(CURDIR)/" $(MAKECMDGOALS)
 
