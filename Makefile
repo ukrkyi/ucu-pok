@@ -65,7 +65,7 @@ build: $(OUT_FILE).bin
 %.bin: %.elf
 	$(CP) -O binary $< $@
 
-$(OUT_FILE).elf: startup_stm32f411xe.o $(OBJECTS) $(addprefix $(LINKDIR), $(LINKFILES))
+$(OUT_FILE).elf: startup_stm32f401xc.o $(OBJECTS) $(addprefix $(LINKDIR), $(LINKFILES))
 	@echo "Linking files $(filter %.o,$^)…"
 	$(CC) $(LDFLAGS) $(filter %.o,$^) $(LDLIBS) -o $@
 
